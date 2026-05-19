@@ -1,0 +1,927 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Craft It </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #00d9ff; --primary-dark: #0099cc; --secondary: #ff2e63;
+            --accent: #ffd700; --dark: #0a0e27; --gray-500: #8a8faa;
+            --gray-600: #aaaac5; --gray-800: #eaeaff; --success: #00ff88;
+            --whatsapp: #25D366; --form: #dc3545; --paypal: #c9ccd3;
+            --warning: #ffaa00;
+        }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); min-height: 100vh; color: var(--gray-800); overflow-x: hidden; }
+        .header { background: rgba(10,14,39,0.95); backdrop-filter: blur(12px); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(0,217,255,0.3); flex-wrap: wrap; }
+        .dropdown-container { position: relative; }
+        .dropdown-btn { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); border: none; display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 40px; font-weight: 700; font-size: 14px; color: var(--dark); cursor: pointer; }
+        .dropdown-menu { position: absolute; top: 50px; left: 0; background: #1a1f3a; min-width: 210px; border-radius: 16px; overflow: hidden; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s; border: 1px solid rgba(0,217,255,0.3); z-index: 200; }
+        .dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .dropdown-item { padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: var(--gray-600); font-weight: 500; cursor: pointer; border-bottom: 1px solid rgba(0,217,255,0.1); }
+        .dropdown-item i { width: 24px; color: var(--primary); }
+        .logo { display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #10182F, #1d2b4e); padding: 6px 18px; border-radius: 60px; border: 1px solid rgba(0,217,255,0.3); }
+        .logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .logo-icon i { font-size: 22px; color: var(--dark); }
+        .logo h1 { font-size: 22px; font-weight: 800; background: linear-gradient(120deg, #FFFFFF, #FFE6B0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .logo span { background: var(--secondary); padding: 2px 8px; border-radius: 20px; font-size: 10px; color: white; margin-left: 4px; }
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .whatsapp-btn { background: var(--whatsapp); color: white; }
+        .form-btn { background: var(--form); color: white; }
+        .profile-badge { background: rgba(0,217,255,0.15); padding: 8px 14px; border-radius: 40px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; color: var(--primary); }
+        @media (max-width:480px){ .profile-badge span { display:none; } .logo h1 { font-size:18px; } }
+        .container { max-width:1200px; margin:0 auto; padding:20px 16px; }
+        .hero { text-align:center; margin-bottom:30px; }
+        .hero h2 { font-size:24px; margin-bottom:12px; }
+        @media (min-width:768px){ .hero h2 { font-size:32px; } }
+        .hero .highlight { background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .offer-badge { display:inline-block; background:rgba(0,217,255,0.15); padding:8px 20px; border-radius:40px; margin-top:16px; font-weight:600; cursor:pointer; color:var(--primary); font-size:13px; }
+        .progress { display:flex; justify-content:space-between; max-width:500px; margin:0 auto 30px; position:relative; }
+        .progress::before { content:''; position:absolute; top:20px; left:40px; right:40px; height:2px; background:rgba(0,217,255,0.3); z-index:1; }
+        .step { text-align:center; position:relative; z-index:2; flex:1; }
+        .step-num { width:40px; height:40px; background:#1a1f3a; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-weight:700; border:2px solid var(--primary); color:var(--primary); }
+        .step.active .step-num { background:var(--primary); color:var(--dark); transform:scale(1.1); }
+        .step-label { font-size:11px; color:var(--gray-500); }
+        .step.active .step-label { color:var(--primary); font-weight:600; }
+        .card { background:rgba(26,31,58,0.9); backdrop-filter:blur(10px); border-radius:24px; padding:20px; border:1px solid rgba(0,217,255,0.2); margin-bottom:20px; }
+        .card-header { display:flex; align-items:center; gap:12px; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid rgba(0,217,255,0.2); }
+        .card-header i { font-size:28px; color:var(--primary); }
+        .card-header h2 { font-size:20px; font-weight:600; }
+        .form-grid { display:flex; flex-direction:column; gap:16px; }
+        @media (min-width:640px){ .form-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; } .full-width { grid-column:span 2; } }
+        .form-group label { display:block; margin-bottom:6px; font-size:13px; font-weight:500; color:var(--gray-600); }
+        .form-group label i { margin-right:6px; color:var(--primary); }
+        .form-control { width:100%; padding:12px 14px; background:rgba(10,14,39,0.6); border:1px solid rgba(0,217,255,0.3); border-radius:12px; font-size:14px; color:white; }
+        .form-control:focus { outline:none; border-color:var(--primary); }
+        .currency-buttons { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+        .currency-btn { padding:8px 16px; background:rgba(10,14,39,0.6); border:1px solid rgba(0,217,255,0.3); border-radius:40px; cursor:pointer; color:white; }
+        .currency-btn.active { background:var(--primary); color:var(--dark); }
+        .service-category { border-bottom: 1px solid rgba(0,217,255,0.1); }
+        .service-category-header { padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600; color: var(--primary); background: rgba(0,217,255,0.08); margin: 4px 0; border-radius: 12px; }
+        .service-sub-items { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: rgba(0,0,0,0.2); border-radius: 0 0 12px 12px; }
+        .service-sub-items.open { max-height: 400px; overflow-y: auto; }
+        .sub-service-item { padding: 10px 14px 10px 40px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-top: 1px solid rgba(0,217,255,0.1); font-size: 13px; }
+        .sub-service-item:hover { background: rgba(0,217,255,0.15); }
+        .dropdown-button { width: 100%; padding: 12px 14px; background: rgba(10,14,39,0.6); border: 1px solid rgba(0,217,255,0.3); border-radius: 12px; display: flex; justify-content: space-between; cursor: pointer; }
+        .dropdown-content { max-height: 500px; overflow-y: auto; background: #1a1f3a; border-radius: 12px; margin-top: 8px; display: none; border: 1px solid rgba(0,217,255,0.3); }
+        .dropdown-content.show { display: block; }
+        .service-tag { background: rgba(0,217,255,0.2); padding: 6px 12px; border-radius: 20px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; margin: 4px; }
+        .service-tag i { cursor: pointer; font-size: 10px; }
+        .price-card { background: linear-gradient(135deg, rgba(0,217,255,0.1), rgba(0,153,204,0.1)); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; margin: 20px 0; }
+        .price-amount { font-size: 28px; font-weight: 700; color: var(--primary); }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 40px; font-weight: 700; cursor: pointer; transition: transform 0.2s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: var(--dark); }
+        .btn-success { background: var(--success); color: var(--dark); }
+        .btn-paypal { background: var(--paypal); color: rgb(21, 62, 120); }
+        .payment-methods { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .method { flex: 1; padding: 12px; text-align: center; background: rgba(10,14,39,0.6); border-radius: 40px; cursor: pointer; border: 1px solid rgba(0,217,255,0.3); transition: all 0.2s; }
+        .method.active { background: var(--primary); color: var(--dark); border-color: var(--primary); }
+        .qr-wrapper { text-align: center; padding: 20px; }
+        #qrCanvas canvas { margin: 0 auto; max-width: 100%; }
+        .paypal-section { background: rgba(22, 40, 102, 0.662); border: 2px solid var(--paypal); border-radius: 20px; padding: 24px; margin-top: 15px; }
+        .paypal-section h4 { color: var(--paypal); margin-bottom: 15px; font-size: 18px; }
+        .instruction-box { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 14px; margin: 15px 0; font-size: 13px; line-height: 1.6; }
+        .app-download-buttons { display: flex; gap: 12px; justify-content: center; margin: 15px 0; flex-wrap: wrap; }
+        .app-btn { display: inline-flex; align-items: center; gap: 8px; background: #000; color: white; padding: 10px 20px; border-radius: 40px; text-decoration: none; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+        .app-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .app-btn.android { background: #3DDC84; color: #000; }
+        .app-btn.ios { background: #000; }
+        .footer { background: rgba(10,14,39,0.95); border-top: 1px solid rgba(0,217,255,0.3); padding: 24px 16px 20px; margin-top: 40px; }
+        .footer-contact { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 20px; }
+        .footer-contact-item { display: flex; align-items: center; gap: 10px; background: rgba(0,217,255,0.08); padding: 10px 20px; border-radius: 50px; font-size: 13px; }
+        .footer-contact-item i { color: var(--primary); }
+        .social-links { text-align: center; margin-bottom: 20px; }
+        .social-links a { display: inline-flex; width: 40px; height: 40px; border-radius: 50%; background: rgba(0,217,255,0.1); margin: 0 8px; color: var(--gray-500); font-size: 20px; text-decoration: none; align-items: center; justify-content: center; }
+        .social-links a:hover { background: var(--primary); color: var(--dark); }
+        .footer-copyright { text-align: center; font-size: 12px; color: var(--gray-500); padding-top: 16px; }
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal.active { display: flex; }
+        .modal-content { background: #1a1f3a; padding: 24px; border-radius: 24px; max-width: 90%; width: 380px; text-align: center; border: 1px solid rgba(0,217,255,0.3); }
+        .warning-text { color: var(--warning); font-size: 12px; margin-top: 10px; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1a1f3a; padding: 10px 20px; border-radius: 40px; display: none; z-index: 1100; border: 1px solid var(--primary); }
+        .toast.show { display: block; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .btn-group .btn { width: auto; padding: 10px 20px; }
+        .backend-section { background: rgba(0,217,255,0.05); border-radius: 12px; padding: 16px; margin: 16px 0; display: none; }
+        .backend-section.visible { display: block; }
+        .backend-options { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .backend-option { padding: 8px 16px; background: rgba(10,14,39,0.6); border: 1px solid rgba(0,217,255,0.3); border-radius: 40px; cursor: pointer; font-size: 13px; }
+        .backend-option.selected { background: var(--primary); color: var(--dark); }
+        .services-count { background: var(--primary); color: var(--dark); border-radius: 20px; padding: 2px 10px; font-size: 12px; margin-left: 10px; }
+        .paypal-amount-large { font-size: 24px; font-weight: 700; color: var(--paypal); margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="dropdown-container">
+        <button class="dropdown-btn" id="menuBtn"><i class="fas fa-bars"></i> Menu</button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-item" data-page="home"><i class="fas fa-home"></i> Home</div>
+            <div class="dropdown-item" data-page="services"><i class="fas fa-cogs"></i> All Services</div>
+            <div class="dropdown-item" data-page="offers"><i class="fas fa-graduation-cap"></i> Student Offers</div>
+            <div class="dropdown-item" data-page="help"><i class="fas fa-question-circle"></i> Help</div>
+        </div>
+    </div>
+    <div class="logo"><div class="logo-icon"><i class="fas fa-robot"></i></div><h1>Craft It <span>Complete</span></h1></div>
+    <div class="header-right">
+        <div class="icon-btn whatsapp-btn" onclick="showPopup('whatsappPopup')"><i class="fab fa-whatsapp"></i></div>
+        <div class="icon-btn form-btn" onclick="window.open('https://forms.gle/5R9TecEYuWNjBUSNA', '_blank')"><i class="fas fa-file-alt"></i></div>
+        <div class="profile-badge" onclick="showPopup('profilePopup')"><i class="fas fa-id-card"></i><span>CREATOR</span></div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="hero">
+        <h2>Build Your Future with <span class="highlight">Craft It</span></h2>
+        <p>Websites • Dashboards • AI • Video Editing • Design • Data • Marketing • Consultation</p>
+        <div class="offer-badge" onclick="showPopup('offerPopup')"><i class="fas fa-microchip"></i> Student Offer: 20% off on first project</div>
+    </div>
+    <div class="progress">
+        <div class="step active" data-step="1"><div class="step-num">1</div><div class="step-label">Details</div></div>
+        <div class="step" data-step="2"><div class="step-num">2</div><div class="step-label">Payment</div></div>
+        <div class="step" data-step="3"><div class="step-num">3</div><div class="step-label">Confirm</div></div>
+    </div>
+
+    <!-- Step 1 - Service Selection -->
+    <div id="step1" class="step-content">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-microchip"></i><h2>Project Details</h2></div>
+            <form id="bookingForm">
+                <div class="form-grid">
+                    <div class="form-group"><label><i class="fas fa-user"></i> Full Name *</label><input type="text" id="name" class="form-control" required></div>
+                    <div class="form-group"><label><i class="fas fa-envelope"></i> Email *</label><input type="email" id="email" class="form-control" required></div>
+                    <div class="form-group"><label><i class="fas fa-phone"></i> Phone *</label><input type="tel" id="phone" class="form-control" required></div>
+                    <div class="form-group"><label><i class="fas fa-graduation-cap"></i> Institution</label><input type="text" id="college" class="form-control"></div>
+                    <div class="form-group full-width"><label><i class="fas fa-coins"></i> Currency</label>
+                        <div class="currency-buttons" id="currencyButtons">
+                            <button type="button" class="currency-btn active" data-currency="INR" data-symbol="₹">INR (₹)</button>
+                            <button type="button" class="currency-btn" data-currency="USD" data-symbol="$">USD ($)</button>
+                            <button type="button" class="currency-btn" data-currency="EUR" data-symbol="€">EUR (€)</button>
+                            <button type="button" class="currency-btn" data-currency="GBP" data-symbol="£">GBP (£)</button>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-code"></i> Select Services * <span id="servicesCount" class="services-count">0</span></label>
+                        <div class="dropdown-button" id="serviceDropdownBtn">Browse All Services (150+ options) <i class="fas fa-chevron-down"></i></div>
+                        <div class="dropdown-content" id="serviceDropdown"><div id="servicesList"></div></div>
+                    </div>
+                    <div class="form-group full-width" id="selectedTags"></div>
+                    <div class="form-group full-width" id="backendSection">
+                        <label><i class="fas fa-server"></i> Backend Technology (For Web Dev Projects)</label>
+                        <div class="backend-options">
+                            <div class="backend-option" data-backend="node">Node.js (₹0)</div>
+                            <div class="backend-option" data-backend="python">Python + Django (₹5,000)</div>
+                            <div class="backend-option" data-backend="php">PHP (₹3,000)</div>
+                            <div class="backend-option" data-backend="java">Java Spring (₹7,000)</div>
+                        </div>
+                    </div>
+                    <div class="form-group full-width"><label><i class="fas fa-align-left"></i> Project Details *</label><textarea id="description" class="form-control" rows="3" placeholder="Describe your project requirements..." required></textarea></div>
+                </div>
+                <div class="price-card"><span>Total (20% student discount)</span><span class="price-amount" id="totalPrice">₹0</span></div>
+                <button type="submit" class="btn btn-primary">Continue to Payment <i class="fas fa-arrow-right"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Step 2 - Payment with Enhanced PayPal Option -->
+    <div id="step2" class="step-content" style="display:none;">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-credit-card"></i><h2>Payment Options</h2></div>
+            <div class="payment-methods">
+                <div class="method active" data-method="qr"><i class="fas fa-qrcode"></i> QR Scan (UPI)</div>
+                <div class="method" data-method="paypal"><i class="fab fa-paypal"></i> PayPal</div>
+            </div>
+            
+            <!-- QR Payment Section -->
+            <div id="qrPayment">
+                <div class="qr-wrapper"><div id="qrCanvas"></div></div>
+                <div class="card" style="text-align:center;"><strong>UPI ID:</strong> Q564515681@ybl <i class="fas fa-copy" onclick="copyUPI()" style="cursor:pointer;"></i></div>
+                <div class="instruction-box"><i class="fas fa-info-circle"></i> Scan QR with Google Pay, PhonePe, Paytm, or any UPI app</div>
+            </div>
+            
+            <!-- PayPal Payment Section - Enhanced with App Download Instructions -->
+            <div id="paypalPayment" style="display:none;">
+                <div class="paypal-section">
+                    <h4><i class="fab fa-paypal"></i> PayPal Payment</h4>
+                    <div class="instruction-box" style="background: rgba(0,48,135,0.2);">
+                        <p><strong>📌 Payment Amount:</strong></p>
+                        <div class="paypal-amount-large" id="paypalAmountDisplay">$0.00 USD</div>
+                        <p><strong>PayPal Email:</strong> craftitsite@gmail.com</p>
+                        <hr style="margin: 15px 0; border-color: rgba(0,48,135,0.3);">
+                        <p><strong>⚠️ Important Instructions:</strong></p>
+                        <p>1️⃣ If you don't have PayPal app, download it below</p>
+                        <p>2️⃣ Create an account or log in to your existing account</p>
+                        <p>3️⃣ Click the "Pay with PayPal" button below</p>
+                        <p>4️⃣ Send the exact amount shown above to <strong>craftitsite@gmail.com</strong></p>
+                        <p class="warning-text" style="margin-top: 10px;"><i class="fas fa-exclamation-triangle"></i> After payment, you MUST download receipt and fill the completion form!</p>
+                    </div>
+                    
+                    <!-- App Download Buttons -->
+                    <div class="app-download-buttons">
+                        <a href="https://play.google.com/store/apps/details?id=com.paypal.android.p2pmobile" target="_blank" class="app-btn android"><i class="fab fa-android"></i> Download for Android</a>
+                        <a href="https://apps.apple.com/app/paypal/id283646709" target="_blank" class="app-btn ios"><i class="fab fa-apple"></i> Download for iOS</a>
+                    </div>
+                    
+                    <!-- PayPal Pay Button - Redirects to App -->
+                    <button class="btn btn-paypal" id="paypalPayBtn" style="font-size: 16px;"><i class="fab fa-paypal"></i> Pay with PayPal App</button>
+                    <p style="font-size: 11px; text-align: center; margin-top: 12px; color: var(--gray-500);">Clicking will open PayPal app or website</p>
+                </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="card" style="margin-top:20px;">
+                <h3>Order Summary</h3>
+                <p><strong>Order ID:</strong> <span id="orderId">-</span></p>
+                <p><strong>Amount to Pay:</strong> <span id="orderAmount" style="color: var(--success); font-weight: bold;">0</span></p>
+                <button class="btn btn-success" id="paymentCompleteBtn" style="margin-top:15px;">✓ I HAVE COMPLETED PAYMENT</button>
+                <button class="btn" style="margin-top:10px; background:transparent; border:1px solid var(--primary);" onclick="goToStep(1)">← Back to Edit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3 - Confirmation -->
+    <div id="step3" class="step-content" style="display:none;">
+        <div class="card" style="text-align:center;">
+            <i class="fas fa-check-circle" style="font-size: 60px; color: var(--success); margin-bottom: 20px;"></i>
+            <h2>Project Initiated! 🚀</h2>
+            <div class="card" style="margin-top: 20px; text-align:left;">
+                <p><strong>Name:</strong> <span id="confirmName">-</span></p>
+                <p><strong>Services:</strong> <span id="confirmServices">-</span></p>
+                <p><strong>Amount Paid:</strong> <span id="confirmAmount">0</span></p>
+            </div>
+            <div class="card" style="background:rgba(37,211,102,0.1);">
+                <i class="fab fa-whatsapp" style="font-size: 30px; color: var(--whatsapp);"></i>
+                <p>Send payment receipt to: <strong>+91 6006573367</strong> on WhatsApp</p>
+                <a href="https://wa.me/916006573367" target="_blank" class="btn" style="display:inline-block; margin-top:10px; background:var(--whatsapp); color:white;">Open WhatsApp</a>
+            </div>
+            <button class="btn btn-primary" onclick="resetForm()" style="margin-top:20px;">+ Start New Project</button>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-contact"><div class="footer-contact-item"><i class="fas fa-phone-alt"></i> +91 6006573367</div><div class="footer-contact-item"><i class="fas fa-envelope"></i> craftitsite@gmail.com</div></div>
+    <div class="social-links"><a href="https://www.instagram.com/craft.itofficial/"><i class="fab fa-instagram"></i></a><a href="https://www.linkedin.com/in/craftit-site-580a23402/"><i class="fab fa-twitter"></i></a><a href="https://github.com/craftitsite"><i class="fab fa-linkedin"></i></a><a href="https://x.com/CraftItoficialx"><i class="fab fa-twitter"></i></a></div>
+    <div class="footer-copyright"><i class="fas fa-copyright"></i> 2026 Craft It — Projects Platform</div>
+</footer>
+
+<!-- Popups -->
+<div id="whatsappPopup" class="modal"><div class="modal-content"><h3>WhatsApp Support</h3><p>+91 6006573367</p><a href="https://wa.me/916006573367" target="_blank" class="btn btn-primary">Open WhatsApp</a><button onclick="closePopup('whatsappPopup')" class="btn">Close</button></div></div>
+<div id="profilePopup" class="modal"><div class="modal-content"><h3>Creator Profile</h3><p>CRAFTIT2026 | 150+ Projects</p><button onclick="closePopup('profilePopup')" class="btn btn-primary">OK</button></div></div>
+<div id="offerPopup" class="modal"><div class="modal-content"><h3>Student Offer 🎓</h3><p>20% off on first project</p><button onclick="closePopup('offerPopup')" class="btn">Awesome!</button></div></div>
+<div id="navPopup" class="modal"><div class="modal-content"><h3 id="navTitle">Craft It</h3><p id="navMsg">Welcome!</p><button onclick="closePopup('navPopup')" class="btn">Continue</button></div></div>
+<div id="servicePopup" class="modal"><div class="modal-content"><h3>✓ Service Added</h3><button onclick="closePopup('servicePopup')" class="btn">OK</button></div></div>
+<div id="paymentPopup" class="modal"><div class="modal-content"><h3>PayPal Redirect</h3><p>Opening PayPal app...</p><p>If app doesn't open, please use the download links above.</p><button onclick="closePopup('paymentPopup')" class="btn">OK</button></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+// ============================================
+// COMPLETE SERVICE DATABASE
+// ============================================
+const SERVICE_PRICES = {
+    'frontend': 5000, 'backend': 7000, 'fullstack': 20000, 'landing_page': 4000, 'ecommerce': 25000,
+    'portfolio_site': 6000, 'blog_site': 5000, 'web_app': 30000, 'mobile_app': 50000, 'saas_platform': 80000,
+    'api_integration': 4000, 'wordpress': 8000, 'shopify': 15000, 'website_redesign': 7000, 'website_maintenance': 2000,
+    'dashboard-basic': 5000, 'dashboard-analytics': 10000, 'dashboard-interactive': 20000, 'crm_dashboard': 25000,
+    'admin_panel': 15000, 'data_visualization': 7000, 'digital_design': 2500, 'sheets': 1500, 'docs': 1200,
+    'whiteboards': 1800, 'pdf_editor': 1200, 'form_design': 2000, 'presentation-basic': 3000, 'pitch_deck': 5000,
+    'social_media': 2500, 'ad_creatives': 3500, 'banner_design': 1500, 'email_templates': 2000, 'newsletter_design': 2500,
+    'resume_design': 1500, 'photo_editor': 1000, 'bg_remover': 800, 'photo_collages': 1000, 'mockups': 2000,
+    'image_enhancer': 1200, 'retouching': 1500, 'thumbnail_design': 1000, 'product_editing': 1500, 'video_editor': 4000,
+    'youtube_editor': 5000, 'video_trimmer': 1500, 'convert_mp4': 1000, 'reels_editing': 2500, 'shorts_editing': 2500,
+    'motion_graphics': 7000, 'subtitle_generation': 1200, 'video_ads': 6000, 'animation': 12000, 'print_design': 2000,
+    'business_cards': 800, 'invitations': 1000, 'flyers': 1200, 'brochures': 1800, 'catalog_design': 3500,
+    'packaging_design': 5000, 'tshirts': 1500, 'mugs': 800, 'stickers': 500, 'hoodies': 2000, 'labels': 600,
+    'posters': 1200, 'merch_bundle': 4000, 'ai_image_gen': 1500, 'ai_photo_editor': 1800, 'ai_art_gen': 2000,
+    'ai_video_gen': 2500, 'text_to_speech': 1800, 'ai_music_gen': 2000, 'ai_chatbot': 15000, 'ai_content_writer': 2500,
+    'voice_cloning': 5000, 'draw': 2500, 'logos': 3000, 'brand_identity': 12000, 'ui_design': 7000, 'ux_design': 9000,
+    'websites': 15000, 'icon_design': 1200, 'mascot_design': 5000, 'seo': 10000, 'google_ads': 5000,
+    'social_media_management': 12000, 'content_strategy': 6000, 'copywriting': 2500, 'data_entry': 1000,
+    'data_cleaning': 2000, 'csv_processing': 1500, 'data_annotation': 2500, 'report_generation': 5000,
+    'data_analysis': 7000, 'financial_analysis': 10000, 'survey_analysis': 6000, 'statistics': 8000,
+    'forecasting': 15000, 'market_research_data': 12000, 'data_dashboard': 10000, 'power_bi': 15000,
+    'tableau': 15000, 'kpi_reporting': 8000, 'excel_automation': 7000, 'google_sheets_automation': 6000,
+    'sql_queries': 3000, 'database_design': 12000, 'database_optimization': 10000, 'data_migration': 8000,
+    'etl_pipeline': 20000, 'big_data': 50000, 'cloud_data_engineering': 35000, 'api_data_integration': 8000,
+    'data_scraping': 5000, 'machine_learning': 30000, 'deep_learning': 50000, 'ai_model_training': 40000,
+    'predictive_analytics': 20000, 'nlp_services': 25000, 'computer_vision': 35000, 'data_security': 12000,
+    'data_consulting': 5000, 'consultation': 1000, 'training': 8000, 'other': 100
+};
+
+const SERVICE_NAMES = {
+    'frontend': 'Frontend Website', 'backend': 'Backend Development', 'fullstack': 'Full Stack Website',
+    'landing_page': 'Landing Page', 'ecommerce': 'E-commerce Website', 'portfolio_site': 'Portfolio Website',
+    'blog_site': 'Blog Website', 'web_app': 'Web Application', 'mobile_app': 'Mobile App Development',
+    'saas_platform': 'SaaS Platform', 'api_integration': 'API Integration', 'wordpress': 'WordPress Website',
+    'shopify': 'Shopify Store', 'website_redesign': 'Website Redesign', 'website_maintenance': 'Website Maintenance',
+    'dashboard-basic': 'Basic Dashboard', 'dashboard-analytics': 'Analytics Dashboard', 'dashboard-interactive': 'Interactive Dashboard',
+    'crm_dashboard': 'CRM Dashboard', 'admin_panel': 'Admin Panel', 'data_visualization': 'Data Visualization',
+    'digital_design': 'Digital Design', 'sheets': 'Sheets', 'docs': 'Docs', 'whiteboards': 'Whiteboards',
+    'pdf_editor': 'PDF Editor', 'form_design': 'Forms & Surveys', 'presentation-basic': 'Presentations',
+    'pitch_deck': 'Pitch Deck', 'social_media': 'Social Media Content', 'ad_creatives': 'Ad Creatives',
+    'banner_design': 'Banner Design', 'email_templates': 'Email Templates', 'newsletter_design': 'Newsletter Design',
+    'resume_design': 'Resume Design', 'photo_editor': 'Photo Editor', 'bg_remover': 'Background Remover',
+    'photo_collages': 'Photo Collages', 'mockups': 'Mockups', 'image_enhancer': 'Image Enhancer',
+    'retouching': 'Photo Retouching', 'thumbnail_design': 'Thumbnail Design', 'product_editing': 'Product Image Editing',
+    'video_editor': 'Video Editor', 'youtube_editor': 'YouTube Editor', 'video_trimmer': 'Video Trimmer',
+    'convert_mp4': 'Convert to MP4', 'reels_editing': 'Reels Editing', 'shorts_editing': 'Shorts Editing',
+    'motion_graphics': 'Motion Graphics', 'subtitle_generation': 'Subtitle Generation', 'video_ads': 'Video Ads',
+    'animation': 'Animation', 'print_design': 'Print Design', 'business_cards': 'Business Cards',
+    'invitations': 'Invitations', 'flyers': 'Flyers', 'brochures': 'Brochures', 'catalog_design': 'Catalog Design',
+    'packaging_design': 'Packaging Design', 'tshirts': 'T-shirts', 'mugs': 'Mugs', 'stickers': 'Stickers',
+    'hoodies': 'Hoodies', 'labels': 'Labels', 'posters': 'Posters', 'merch_bundle': 'Merchandise Bundle',
+    'ai_image_gen': 'AI Image Generator', 'ai_photo_editor': 'AI Photo Editor', 'ai_art_gen': 'AI Art Generator',
+    'ai_video_gen': 'AI Video Generator', 'text_to_speech': 'Text to Speech', 'ai_music_gen': 'AI Music Generator',
+    'ai_chatbot': 'AI Chatbot', 'ai_content_writer': 'AI Content Writer', 'voice_cloning': 'Voice Cloning',
+    'draw': 'Draw/Illustration', 'logos': 'Logo Design', 'brand_identity': 'Brand Identity', 'ui_design': 'UI Design',
+    'ux_design': 'UX Design', 'websites': 'Websites', 'icon_design': 'Icon Design', 'mascot_design': 'Mascot Design',
+    'seo': 'SEO Optimization', 'google_ads': 'Google Ads', 'social_media_management': 'Social Media Management',
+    'content_strategy': 'Content Strategy', 'copywriting': 'Copywriting', 'data_entry': 'Data Entry',
+    'data_cleaning': 'Data Cleaning', 'csv_processing': 'CSV Processing', 'data_annotation': 'Data Annotation',
+    'report_generation': 'Report Generation', 'data_analysis': 'Data Analysis', 'financial_analysis': 'Financial Analysis',
+    'survey_analysis': 'Survey Analysis', 'statistics': 'Statistics', 'forecasting': 'Forecasting',
+    'market_research_data': 'Market Research', 'data_dashboard': 'Data Dashboard', 'power_bi': 'Power BI',
+    'tableau': 'Tableau', 'kpi_reporting': 'KPI Reporting', 'excel_automation': 'Excel Automation',
+    'google_sheets_automation': 'Google Sheets Automation', 'sql_queries': 'SQL Queries', 'database_design': 'Database Design',
+    'database_optimization': 'Database Optimization', 'data_migration': 'Data Migration', 'etl_pipeline': 'ETL Pipeline',
+    'big_data': 'Big Data', 'cloud_data_engineering': 'Cloud Data Engineering', 'api_data_integration': 'API Data Integration',
+    'data_scraping': 'Data Scraping', 'machine_learning': 'Machine Learning', 'deep_learning': 'Deep Learning',
+    'ai_model_training': 'AI Model Training', 'predictive_analytics': 'Predictive Analytics', 'nlp_services': 'NLP Services',
+    'computer_vision': 'Computer Vision', 'data_security': 'Data Security', 'data_consulting': 'Data Consulting',
+    'consultation': 'Consultation', 'training': 'Training & Workshops', 'other': 'Custom Project'
+};
+
+const BACKEND_PRICES = { node: 0, python: 5000, php: 3000, java: 7000 };
+const DISCOUNT = 0.2;
+const CREATOR_UPI = 'Q564515681@ybl';
+const PAYPAL_EMAIL = 'craftitsite@gmail.com';
+const CURRENCY_RATES = { INR: 1, USD: 0.012, EUR: 0.011 , GBP: 0.0095 };
+
+let selectedServices = [], selectedBackend = null, currentCurrency = 'INR', currentSymbol = '₹', bookingData = {}, currentOrderId = '', currentDiscountedINR = 0;
+
+function getServicePrice(id) { return SERVICE_PRICES[id] || 0; }
+function getServiceName(id) { return SERVICE_NAMES[id] || id; }
+function convertPrice(p) { return Math.round(p * CURRENCY_RATES[currentCurrency]); }
+function formatPrice(p) { return `${currentSymbol}${convertPrice(p).toLocaleString()}`; }
+
+function updateTotal() {
+    let total = selectedServices.reduce((sum, id) => sum + getServicePrice(id), 0);
+    let isWebRelated = selectedServices.includes('fullstack') || selectedServices.includes('frontend') || selectedServices.includes('web_app');
+    if (selectedBackend && isWebRelated) total += BACKEND_PRICES[selectedBackend] || 0;
+    let discounted = total * (1 - DISCOUNT);
+    currentDiscountedINR = discounted;
+    document.getElementById('totalPrice').innerHTML = formatPrice(discounted);
+    document.getElementById('orderAmount').innerHTML = formatPrice(discounted);
+    let usdAmount = (discounted * 0.012).toFixed(2);
+    document.getElementById('paypalAmountDisplay').innerHTML = `$${usdAmount} USD`;
+    document.getElementById('selectedTags').innerHTML = selectedServices.map(id => `<span class="service-tag">${getServiceName(id)} <i class="fas fa-times" onclick="removeService('${id}')"></i></span>`).join('');
+    document.getElementById('servicesCount').innerText = selectedServices.length;
+    let needsBackend = selectedServices.includes('fullstack') || selectedServices.includes('frontend') || selectedServices.includes('web_app');
+    document.getElementById('backendSection').classList.toggle('visible', needsBackend);
+    if(!needsBackend) selectedBackend = null;
+}
+
+function removeService(id) { selectedServices = selectedServices.filter(s => s !== id); updateTotal(); }
+function addService(id) { if (!selectedServices.includes(id)) { selectedServices.push(id); updateTotal(); showPopup('servicePopup'); } }
+
+function buildServicesDropdown() {
+    let categories = {
+        '🌐 Web Development': ['frontend','backend','fullstack','landing_page','ecommerce','portfolio_site','blog_site','web_app','mobile_app','saas_platform','api_integration','wordpress','shopify','website_redesign','website_maintenance'],
+        '📊 Dashboards': ['dashboard-basic','dashboard-analytics','dashboard-interactive','crm_dashboard','admin_panel','data_visualization'],
+        '📄 Productivity': ['digital_design','sheets','docs','whiteboards','pdf_editor','form_design'],
+        '🎨 Presentations': ['presentation-basic','pitch_deck','social_media','ad_creatives','banner_design','email_templates','newsletter_design','resume_design'],
+        '📸 Photo & Video': ['photo_editor','bg_remover','photo_collages','mockups','image_enhancer','retouching','thumbnail_design','product_editing','video_editor','youtube_editor','video_trimmer','convert_mp4','reels_editing','shorts_editing','motion_graphics','subtitle_generation','video_ads','animation'],
+        '🖨️ Print & Merch': ['print_design','business_cards','invitations','flyers','brochures','catalog_design','packaging_design','tshirts','mugs','stickers','hoodies','labels','posters','merch_bundle'],
+        '🤖 AI Services': ['ai_image_gen','ai_photo_editor','ai_art_gen','ai_video_gen','text_to_speech','ai_music_gen','ai_chatbot','ai_content_writer','voice_cloning'],
+        '🎯 Branding': ['draw','logos','brand_identity','ui_design','ux_design','websites','icon_design','mascot_design'],
+        '📢 Marketing': ['seo','google_ads','social_media_management','content_strategy','copywriting'],
+        '📈 Data Services': ['data_entry','data_cleaning','csv_processing','data_annotation','report_generation','data_analysis','financial_analysis','survey_analysis','statistics','forecasting','market_research_data','data_dashboard','power_bi','tableau','kpi_reporting','excel_automation','google_sheets_automation','sql_queries','database_design','database_optimization','data_migration','etl_pipeline','big_data','cloud_data_engineering','api_data_integration','data_scraping','machine_learning','deep_learning','ai_model_training','predictive_analytics','nlp_services','computer_vision','data_security','data_consulting'],
+        '💼 Consulting': ['consultation','training','other']
+    };
+    let html = '';
+    for(let cat in categories) {
+        html += `<div class="service-category"><div class="service-category-header" onclick="toggleCategory(event, this)"><i class="fas fa-folder-open"></i> ${cat} <span style="color:#00d9ff;">(${categories[cat].length})</span> <i class="fas fa-chevron-right"></i></div><div class="service-sub-items">`;
+        categories[cat].forEach(id => { if(SERVICE_NAMES[id]) html += `<div class="sub-service-item" data-service="${id}"><span>${SERVICE_NAMES[id]}</span><span style="color:#00ff88;">₹${SERVICE_PRICES[id].toLocaleString()}</span></div>`; });
+        html += `</div></div>`;
+    }
+    document.getElementById('servicesList').innerHTML = html;
+    document.querySelectorAll('.sub-service-item').forEach(el => { el.addEventListener('click', (e) => { e.stopPropagation(); addService(el.dataset.service); }); });
+}
+
+window.toggleCategory = function(event, header) {
+    event.stopPropagation();
+    let sub = header.nextElementSibling;
+    let chev = header.querySelector('.fa-chevron-right');
+    sub.classList.toggle('open');
+    chev.style.transform = sub.classList.contains('open') ? 'rotate(90deg)' : 'rotate(0deg)';
+};
+
+// Event Listeners
+document.querySelectorAll('.currency-btn').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCurrency = btn.dataset.currency;
+    currentSymbol = btn.dataset.symbol;
+    updateTotal();
+    showToast(`Currency changed to ${currentCurrency}`);
+}));
+
+document.querySelectorAll('.backend-option').forEach(opt => opt.addEventListener('click', () => {
+    document.querySelectorAll('.backend-option').forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    selectedBackend = opt.dataset.backend;
+    updateTotal();
+}));
+
+document.getElementById('serviceDropdownBtn')?.addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('serviceDropdown').classList.toggle('show'); });
+document.addEventListener('click', (e) => { if (!e.target.closest('#serviceDropdownBtn') && !e.target.closest('.service-category')) document.getElementById('serviceDropdown')?.classList.remove('show'); if (!e.target.closest('.dropdown-container')) document.getElementById('dropdownMenu')?.classList.remove('show'); });
+document.getElementById('menuBtn')?.addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('dropdownMenu').classList.toggle('show'); });
+
+document.querySelectorAll('.dropdown-item[data-page]').forEach(item => item.addEventListener('click', () => {
+    let page = item.dataset.page, title='', msg='';
+    if (page === 'home') { title='Craft It'; msg='All 150+ tech services in one place!'; }
+    else if (page === 'services') { title='All Services'; msg='Web, AI, Design, Data, Video, Marketing & more!'; }
+    else if (page === 'offers') { title='Student Offers'; msg='20% discount on first project!'; }
+    else { title='Help Center'; msg='Contact: +91 6006573367'; }
+    document.getElementById('navTitle').innerHTML = title; document.getElementById('navMsg').innerHTML = msg;
+    showPopup('navPopup'); document.getElementById('dropdownMenu').classList.remove('show');
+}));
+
+function goToStep(step) { document.querySelectorAll('.step-content').forEach((el,i) => { el.style.display = i+1 === step ? 'block' : 'none'; }); document.querySelectorAll('.step').forEach((el,i) => { if(i+1 <= step) el.classList.add('active'); else el.classList.remove('active'); }); }
+
+document.querySelectorAll('.method').forEach(m => m.addEventListener('click', () => {
+    document.querySelectorAll('.method').forEach(meth => meth.classList.remove('active'));
+    m.classList.add('active');
+    let method = m.dataset.method;
+    document.getElementById('qrPayment').style.display = method === 'qr' ? 'block' : 'none';
+    document.getElementById('paypalPayment').style.display = method === 'paypal' ? 'block' : 'none';
+}));
+
+function copyUPI() { navigator.clipboard.writeText(CREATOR_UPI); showToast('UPI ID copied!'); }
+function showToast(msg) { let t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+function showPopup(id) { document.getElementById(id).classList.add('active'); }
+function closePopup(id) { document.getElementById(id).classList.remove('active'); }
+
+// PayPal Redirect Function
+document.getElementById('paypalPayBtn')?.addEventListener('click', () => {
+    let usdAmount = (currentDiscountedINR * 0.012).toFixed(2);
+    let orderIdForPayPal = currentOrderId || 'ORDER_' + Date.now();
+    let paypalAppUrl = `paypal://x-callback-url/web?cmd=_xclick&business=${PAYPAL_EMAIL}&amount=${usdAmount}&currency_code=USD&item_name=CraftIt_Project_${orderIdForPayPal}`;
+    let paypalWebUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${PAYPAL_EMAIL}&amount=${usdAmount}&currency_code=USD&item_name=CraftIt_Project_${orderIdForPayPal}`;
+    showPopup('paymentPopup');
+    setTimeout(() => {
+        window.location.href = paypalAppUrl;
+        setTimeout(() => { window.location.href = paypalWebUrl; }, 800);
+    }, 500);
+});
+
+document.getElementById('bookingForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (selectedServices.length === 0) { showToast('Please select at least one service'); return; }
+    bookingData.name = document.getElementById('name').value.trim();
+    bookingData.email = document.getElementById('email').value.trim();
+    bookingData.phone = document.getElementById('phone').value.trim();
+    bookingData.college = document.getElementById('college').value.trim();
+    bookingData.description = document.getElementById('description').value.trim();
+    if (!bookingData.name || !bookingData.email || !bookingData.phone) { showToast('Fill all required fields'); return; }
+    currentOrderId = 'CRAFT_' + Date.now();
+    document.getElementById('orderId').innerHTML = currentOrderId;
+    let total = selectedServices.reduce((sum, id) => sum + getServicePrice(id), 0);
+    let isWebRelated = selectedServices.includes('fullstack') || selectedServices.includes('frontend') || selectedServices.includes('web_app');
+    if (selectedBackend && isWebRelated) total += BACKEND_PRICES[selectedBackend] || 0;
+    let discounted = total * (1 - DISCOUNT);
+    currentDiscountedINR = discounted;
+    document.getElementById('orderAmount').innerHTML = formatPrice(discounted);
+    let upiString = `upi://pay?pa=${CREATOR_UPI}&pn=Craft%20It&am=${Math.round(discounted)}&cu=INR&tn=${currentOrderId}`;
+    document.getElementById('qrCanvas').innerHTML = '';
+    QRCode.toCanvas(upiString, { width: 200 }, (err, canvas) => { if (!err && canvas) document.getElementById('qrCanvas').appendChild(canvas); });
+    updateTotal();
+    goToStep(2);
+    showToast('Order created! Choose payment method');
+});
+
+// WORKING RECEIPT DOWNLOAD - GUARANTEED TO DOWNLOAD
+// WORKING RECEIPT DOWNLOAD - GUARANTEED TO DOWNLOAD
+function downloadReceipt() {
+    try {
+        const { jsPDF } = window.jspdf;
+        
+        // Create canvas with clean design
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set dimensions (A4 ratio - 1:1.414)
+        const width = 800;
+        const height = 1130;
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Clean white background with subtle grey gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, '#FAFAFA');
+        gradient.addColorStop(1, '#FFFFFF');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+        
+        // ============ CLEAN WATERMARK with 𔒝 ============
+        ctx.save();
+        ctx.globalAlpha = 0.06;
+        ctx.font = 'bold 80px "Segoe UI Symbol", "Arial", sans-serif';
+        ctx.fillStyle = 'rgb(70, 130, 180)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Single clean watermark
+        ctx.translate(width / 2, height / 2);
+        ctx.rotate(-Math.PI / 6);
+        ctx.fillText('𔒝 CRAFT IT 𔒝', 0, 0);
+        ctx.restore();
+        
+        // ============ CLEAN BORDERS ============
+        // Single clean border
+        ctx.strokeStyle = 'rgb(70, 130, 180)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(35, 35, width - 70, height - 70);
+        
+        let y = 75;
+        const margin = 55;
+        const rightCol = width - margin;
+        
+        // ============ HEADER ============
+        ctx.fillStyle = 'rgb(70, 130, 180)';
+        ctx.font = 'bold 34px "Helvetica Neue", "Arial"';
+        ctx.textAlign = 'center';
+        ctx.fillText('CRAFT IT', width / 2, y);
+        
+        y += 32;
+        ctx.fillStyle = '#999999';
+        ctx.font = '12px "Helvetica Neue", "Arial"';
+        ctx.fillText('Vibe With Crafts — Creative Digital Solutions', width / 2, y);
+        
+        // Simple line separator
+        y += 20;
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgb(70, 130, 180)';
+        ctx.lineWidth = 1;
+        ctx.moveTo(margin, y);
+        ctx.lineTo(rightCol, y);
+        ctx.stroke();
+        
+        // ============ RECEIPT TITLE ============
+        y += 22;
+        ctx.fillStyle = '#333333';
+        ctx.font = 'bold 20px "Helvetica Neue", "Arial"';
+        ctx.fillText('PAYMENT RECEIPT', width / 2, y);
+        
+        // Receipt number
+        y += 15;
+        ctx.fillStyle = 'rgb(70, 130, 180)';
+        ctx.font = '10px "Helvetica Neue", "Arial"';
+        ctx.fillText(`Receipt No: ${currentOrderId || 'CRAFT_' + Date.now()}`, width / 2, y);
+        
+        y += 28;
+        
+        // Helper function for section headers
+        function drawSection(title, yPos) {
+            ctx.fillStyle = 'rgb(70, 130, 180)';
+            ctx.font = 'bold 13px "Helvetica Neue", "Arial"';
+            ctx.textAlign = 'left';
+            ctx.fillText(title, margin, yPos);
+            return yPos + 18;
+        }
+        
+        // Helper for info rows
+        function drawInfoRow(label, value, yPos, isImportant = false) {
+            ctx.fillStyle = '#777777';
+            ctx.font = '11px "Helvetica Neue", "Arial"';
+            ctx.textAlign = 'left';
+            ctx.fillText(label, margin + 8, yPos);
+            
+            ctx.fillStyle = isImportant ? 'rgb(70, 130, 180)' : '#333333';
+            ctx.font = isImportant ? 'bold 11px "Helvetica Neue", "Arial"' : '11px "Helvetica Neue", "Arial"';
+            ctx.fillText(value, margin + 110, yPos);
+        }
+        
+        // ============ ORDER INFORMATION ============
+        y = drawSection('ORDER INFORMATION', y);
+        drawInfoRow('Order ID:', currentOrderId || 'CRAFT_' + Date.now(), y);
+        y += 18;
+        drawInfoRow('Date:', new Date().toLocaleString(), y);
+        y += 18;
+        drawInfoRow('Status:', '✓ PAID', y, true);
+        y += 28;
+        
+        // ============ CUSTOMER DETAILS ============
+        y = drawSection('CUSTOMER DETAILS', y);
+        drawInfoRow('Name:', bookingData.name || 'Customer', y);
+        y += 18;
+        drawInfoRow('Email:', bookingData.email || 'Not provided', y);
+        y += 18;
+        drawInfoRow('Phone:', bookingData.phone || 'Not provided', y);
+        y += 28;
+        
+        // ============ SERVICES ============
+        y = drawSection('SERVICES', y);
+        
+        let total = 0;
+        let isWebRelated = selectedServices.includes('fullstack') || selectedServices.includes('frontend') || selectedServices.includes('web_app');
+        
+        ctx.font = '11px "Helvetica Neue", "Arial"';
+        
+        // List services
+        for (let i = 0; i < selectedServices.length; i++) {
+            let id = selectedServices[i];
+            let price = SERVICE_PRICES[id] || 0;
+            let name = SERVICE_NAMES[id] || id;
+            total += price;
+            
+            ctx.fillStyle = '#444444';
+            ctx.fillText(name, margin + 8, y);
+            ctx.fillStyle = '#333333';
+            ctx.textAlign = 'right';
+            ctx.fillText(`₹${price.toLocaleString()}`, rightCol - 8, y);
+            ctx.textAlign = 'left';
+            y += 18;
+        }
+        
+        // Backend service
+        if (selectedBackend && isWebRelated) {
+            let backendPrice = BACKEND_PRICES[selectedBackend] || 0;
+            total += backendPrice;
+            ctx.fillStyle = '#444444';
+            ctx.fillText(`Backend (${selectedBackend.toUpperCase()})`, margin + 8, y);
+            ctx.fillStyle = '#333333';
+            ctx.textAlign = 'right';
+            ctx.fillText(`₹${backendPrice.toLocaleString()}`, rightCol - 8, y);
+            ctx.textAlign = 'left';
+            y += 18;
+        }
+        
+        y += 12;
+        
+        // ============ TOTAL CALCULATION ============
+        let discountedTotal = total * (1 - DISCOUNT);
+        let discountAmount = total - discountedTotal;
+        
+        const totalLabelX = rightCol - 130;
+        const totalValueX = rightCol - 8;
+        
+        ctx.textAlign = 'right';
+        ctx.font = '11px "Helvetica Neue", "Arial"';
+        ctx.fillStyle = '#666666';
+        ctx.fillText('Subtotal:', totalLabelX, y);
+        ctx.fillStyle = '#333333';
+        ctx.fillText(`₹${total.toLocaleString()}`, totalValueX, y);
+        
+        y += 18;
+        ctx.fillStyle = 'rgb(70, 130, 180)';
+        ctx.fillText('Student Discount (20%):', totalLabelX, y);
+        ctx.fillText(`-₹${Math.round(discountAmount).toLocaleString()}`, totalValueX, y);
+        
+        y += 22;
+        ctx.font = 'bold 14px "Helvetica Neue", "Arial"';
+        ctx.fillStyle = 'rgb(70, 130, 180)';
+        ctx.fillText('TOTAL AMOUNT:', totalLabelX, y);
+        ctx.fillText(`₹${Math.round(discountedTotal).toLocaleString()}`, totalValueX, y);
+        
+        y += 35;
+        ctx.textAlign = 'left';
+        
+        // ============ PAYMENT INFORMATION ============
+        y = drawSection('PAYMENT INFORMATION', y);
+        
+        ctx.fillStyle = '#666666';
+        ctx.font = '11px "Helvetica Neue", "Arial"';
+        ctx.fillText('UPI ID:', margin + 8, y);
+        ctx.fillStyle = 'rgb(70, 130, 180)';
+        ctx.font = 'bold 11px "Helvetica Neue", "Arial"';
+        ctx.fillText(CREATOR_UPI, margin + 65, y);
+        
+        y += 18;
+        ctx.fillStyle = '#666666';
+        ctx.font = '11px "Helvetica Neue", "Arial"';
+        ctx.fillText('PayPal:', margin + 8, y);
+        ctx.fillStyle = 'rgb(70, 130, 180)';
+        ctx.font = 'bold 11px "Helvetica Neue", "Arial"';
+        ctx.fillText('craftitsite@gmail.com', margin + 65, y);
+        
+        y += 35;
+        
+        // ============ NOTE ============
+        ctx.fillStyle = '#F7F7F7';
+        ctx.fillRect(margin, y, width - (margin * 2), 35);
+        
+        ctx.fillStyle = 'rgb(70, 130, 180)';
+        ctx.font = 'bold 10px "Helvetica Neue", "Arial"';
+        ctx.textAlign = 'center';
+        ctx.fillText('📋 Note', width / 2, y + 12);
+        
+        ctx.fillStyle = '#888888';
+        ctx.font = '9px "Helvetica Neue", "Arial"';
+        ctx.fillText('Receipt will be sent to your registered email', width / 2, y + 25);
+        
+        y += 50;
+        
+        // ============ FOOTER ============
+        const footerY = height - 55;
+        
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgb(70, 130, 180)';
+        ctx.lineWidth = 0.8;
+        ctx.moveTo(margin, footerY);
+        ctx.lineTo(rightCol, footerY);
+        ctx.stroke();
+        
+        ctx.fillStyle = '#999999';
+        ctx.font = '10px "Helvetica Neue", "Arial"';
+        ctx.textAlign = 'center';
+        ctx.fillText('Thank you for choosing Craft It!', width / 2, footerY + 12);
+        ctx.fillText('For support: craftitsite@gmail.com', width / 2, footerY + 24);
+        ctx.fillStyle = 'rgb(70, 130, 180)';
+        ctx.font = 'bold 9px "Segoe UI Symbol", "Helvetica Neue", "Arial"';
+        ctx.fillText('𔒝 CRAFT IT 𔒝', width / 2, footerY + 38);
+        
+        // ============ CONVERT TO PDF ============
+        const imgData = canvas.toDataURL('image/png');
+        const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+        
+        const imgWidth = 210;
+        const imgHeight = (height * imgWidth) / width;
+        
+        doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        doc.save(`CraftIt_Receipt_${currentOrderId || 'ORDER'}.pdf`);
+        
+        showToast('✓ Receipt downloaded successfully!');
+        return true;
+        
+    } catch (error) {
+        console.error('Receipt Error:', error);
+        
+        // Clean fallback receipt
+        try {
+            let total = 0;
+            for (let i = 0; i < selectedServices.length; i++) {
+                let price = SERVICE_PRICES[selectedServices[i]] || 0;
+                total += price;
+            }
+            
+            let isWebRelated = selectedServices.includes('fullstack') || selectedServices.includes('frontend') || selectedServices.includes('web_app');
+            if (selectedBackend && isWebRelated) {
+                total += BACKEND_PRICES[selectedBackend] || 0;
+            }
+            
+            let discountedTotal = total * (1 - DISCOUNT);
+            
+            const receiptHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Craft It Receipt</title>
+                    <style>
+                        body {
+                            font-family: 'Helvetica Neue', Arial, sans-serif;
+                            padding: 40px;
+                            max-width: 700px;
+                            margin: 0 auto;
+                            background: #FAFAFA;
+                        }
+                        .receipt {
+                            background: white;
+                            padding: 40px;
+                            border: 2px solid rgb(70, 130, 180);
+                            position: relative;
+                        }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .logo { color: rgb(70, 130, 180); font-size: 32px; font-weight: bold; margin: 0; }
+                        .tagline { color: #999; font-size: 11px; margin-top: 5px; }
+                        .title { text-align: center; font-size: 18px; font-weight: bold; margin: 15px 0; color: #333; }
+                        .receipt-no { text-align: center; color: rgb(70, 130, 180); font-size: 10px; margin-bottom: 25px; }
+                        .section { margin: 20px 0; }
+                        .section-title { color: rgb(70, 130, 180); font-weight: bold; font-size: 13px; margin-bottom: 12px; }
+                        .row { margin: 6px 0; display: flex; }
+                        .label { color: #777; width: 100px; font-size: 11px; }
+                        .value { color: #333; flex: 1; font-size: 11px; }
+                        .total { margin-top: 20px; text-align: right; padding-top: 15px; }
+                        .total-amount { font-size: 15px; font-weight: bold; color: rgb(70, 130, 180); margin-top: 5px; }
+                        .footer { text-align: center; margin-top: 40px; color: #999; font-size: 10px; padding-top: 20px; border-top: 1px solid #E0E0E0; }
+                        .symbol { color: rgb(70, 130, 180); }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt">
+                        <div class="header">
+                            <h1 class="logo">CRAFT IT <span class="symbol">𔒝</span></h1>
+                            <div class="tagline">Vibe With Crafts </div>
+                        </div>
+                        <div class="title">PAYMENT RECEIPT</div>
+                        <div class="receipt-no">Receipt No: ${currentOrderId || 'CRAFT_' + Date.now()}</div>
+                        
+                        <div class="section">
+                            <div class="section-title">ORDER INFORMATION</div>
+                            <div class="row"><div class="label">Order ID:</div><div class="value">${currentOrderId || 'CRAFT_' + Date.now()}</div></div>
+                            <div class="row"><div class="label">Date:</div><div class="value">${new Date().toLocaleString()}</div></div>
+                            <div class="row"><div class="label">Status:</div><div class="value" style="color:rgb(70, 130, 180);">✓ PAID</div></div>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="section-title">CUSTOMER DETAILS</div>
+                            <div class="row"><div class="label">Name:</div><div class="value">${bookingData.name || 'Customer'}</div></div>
+                            <div class="row"><div class="label">Email:</div><div class="value">${bookingData.email || 'Not provided'}</div></div>
+                            <div class="row"><div class="label">Phone:</div><div class="value">${bookingData.phone || 'Not provided'}</div></div>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="section-title">SERVICES</div>
+                            ${selectedServices.map(id => `<div class="row"><div class="label">${SERVICE_NAMES[id] || id}:</div><div class="value">₹${(SERVICE_PRICES[id] || 0).toLocaleString()}</div></div>`).join('')}
+                            ${selectedBackend && isWebRelated ? `<div class="row"><div class="label">Backend (${selectedBackend.toUpperCase()}):</div><div class="value">₹${(BACKEND_PRICES[selectedBackend] || 0).toLocaleString()}</div></div>` : ''}
+                        </div>
+                        
+                        <div class="total">
+                            <div>Subtotal: ₹${total.toLocaleString()}</div>
+                            <div style="color:rgb(70, 130, 180);">Student Discount (20%): -₹${Math.round(total * DISCOUNT).toLocaleString()}</div>
+                            <div class="total-amount">TOTAL AMOUNT: ₹${Math.round(discountedTotal).toLocaleString()}</div>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="section-title">PAYMENT INFORMATION</div>
+                            <div class="row"><div class="label">UPI ID:</div><div class="value" style="color:rgb(70, 130, 180);">${CREATOR_UPI}</div></div>
+                            <div class="row"><div class="label">PayPal:</div><div class="value" style="color:rgb(70, 130, 180);">craftitsite@gmail.com</div></div>
+                        </div>
+                        
+                        <div class="footer">
+                            <div>Thank you for choosing Craft It! || For support: craftitsite@gmail.com <span class="symbol">𔒝</span></div>
+            
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([receiptHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `CraftIt_Receipt_${currentOrderId || 'ORDER'}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('✓ Receipt downloaded as HTML file!');
+        } catch (fallbackError) {
+            showToast('Receipt generated! Please contact support.');
+        }
+        return false;
+    }
+}
+
+// Make sure the function is globally accessible
+window.downloadReceipt = downloadReceipt;
+function proceedToConfirmation() {
+    let servicesList = selectedServices.map(id => getServiceName(id)).join(', ');
+
+    document.getElementById('confirmName').innerHTML = bookingData.name;
+    document.getElementById('confirmServices').innerHTML = servicesList;
+    let total = selectedServices.reduce((sum, id) => sum + getServicePrice(id), 0);
+    let isWebRelated = selectedServices.includes('fullstack') || selectedServices.includes('frontend') || selectedServices.includes('web_app');
+    if (selectedBackend && isWebRelated) total += BACKEND_PRICES[selectedBackend] || 0;
+    let discounted = total * (1 - DISCOUNT);
+    document.getElementById('confirmAmount').innerHTML = `₹${Math.round(discounted).toLocaleString()}`;
+    goToStep(3);
+    showToast('Booking confirmed! Send receipt via WhatsApp');
+}
+
+function showMandatoryReceiptPopup() {
+    let popupHtml = `<div class="modal-content"><h3><i class="fas fa-file-pdf"></i> Complete Booking</h3><div style="background:rgba(220,53,69,0.15);padding:15px;border-radius:12px;margin:15px 0;"><p><strong>⚠️ MANDATORY STEPS:</strong></p><p>1️⃣ Download the Receipt (PDF will be saved)</p><p>2️⃣ Fill the Project Details Form (opens in new tab)</p><p>⚠️Payment will be Verified Twice then only Invoice will be reverted. Fill and Pay With Attention! </p> <p style="color:var(--warning); margin-top:10px;">Without completing BOTH steps, your payment will NOT be considered!</p></div><div class="btn-group"><button class="btn btn-primary" id="dlReceiptBtn"><i class="fas fa-download"></i> Download Receipt</button><button class="btn" id="openFormBtn" style="background:var(--form);color:white;"><i class="fas fa-file-alt"></i> Open Form</button></div><button class="btn btn-success" id="confirmBothBtn" style="margin-top:10px;" disabled>✓ I HAVE DONE BOTH</button><button onclick="closePopup('mandatoryPopup')" class="btn">Cancel</button></div>`;
+    let existing = document.getElementById('mandatoryPopup');
+    if(existing) existing.remove();
+    let popup = document.createElement('div'); popup.id='mandatoryPopup'; popup.className='modal'; popup.innerHTML=popupHtml;
+    document.body.appendChild(popup);
+    let receiptOk=false, formOk=false;
+    document.getElementById('dlReceiptBtn')?.addEventListener('click',()=>{ downloadReceipt(); receiptOk=true; document.getElementById('dlReceiptBtn').innerHTML='<i class="fas fa-check"></i> Downloaded'; checkBoth(); });
+    document.getElementById('openFormBtn')?.addEventListener('click',()=>{ window.open('https://forms.gle/5R9TecEYuWNjBUSNA','_blank'); formOk=true; document.getElementById('openFormBtn').innerHTML='<i class="fas fa-check"></i> Form Opened'; checkBoth(); });
+    function checkBoth(){ let btn = document.getElementById('confirmBothBtn'); if(receiptOk && formOk){ btn.disabled=false; btn.style.opacity='1'; btn.onclick=()=>{ closePopup('mandatoryPopup'); proceedToConfirmation(); }; } }
+    popup.classList.add('active');
+}
+
+document.getElementById('paymentCompleteBtn')?.addEventListener('click', () => { showMandatoryReceiptPopup(); });
+function resetForm() { selectedServices = []; selectedBackend = null; updateTotal(); document.getElementById('bookingForm')?.reset(); document.getElementById('selectedTags').innerHTML = ''; goToStep(1); }
+
+buildServicesDropdown();
+updateTotal();
+setTimeout(() => { let qr = document.getElementById('qrCanvas'); if(qr && qr.children.length===0) QRCode.toCanvas('upi://pay?pa=Q564515681@ybl', { width:200 }, (err, c) => { if(!err && c) qr.appendChild(c); }); }, 100);
+</script>
+</body>
+</html>
